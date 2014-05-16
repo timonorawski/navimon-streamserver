@@ -9,7 +9,10 @@ var doAverageBucket = function(sizeInSeconds, stream, point, mongo, callback) {
 		averageTime = new Date(point.at.getTime()),
 		averagePeriod = "1m",
 		streamLastUpdate = stream.lastUpdate,
-		streamid = new mongodb.ObjectID(stream._id);
+		streamid = stream._id;
+	try {
+		streamid = new mongodb.ObjectID(streamid);
+	} catch(e) {}
 	averageTime.setTime(averageTime.getTime() - (averageTime.getTime()%(sizeInSeconds*1000)));
 	if (sizeInSeconds < 60) {
 		averagePeriod = "" + sizeInSeconds + "s";
@@ -33,7 +36,7 @@ var doAverageBucket = function(sizeInSeconds, stream, point, mongo, callback) {
 		} else {
 			var newpoint = {
 				at: averageTime,
-				streamid: new mongodb.ObjectID(stream._id),
+				streamid: streamid,
 				type: "average",
 				datapoints: 1,
 				averagePeriod: averagePeriod,
@@ -55,7 +58,10 @@ exports.addDataPoint = function(stream, point, mongo, callback, writeLog) {
 	var datastreams = mongo.collection('datastreams'),
 		datapoints = mongo.collection('datapoints');
 	var streamLastUpdate = stream.lastUpdate;
-	var streamid = new mongodb.ObjectID(stream._id);
+	var streamid = stream._id;
+	try {
+		streamid = new mongodb.ObjectID(stream._id);
+	} catch(e){}
 	datastreams.update({"_id": streamid}, {$set:{lastUpdate: point.at, currentValue: point.value}}, {}, function(err){});
 
 	var cb = function() {

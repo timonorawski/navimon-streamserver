@@ -325,6 +325,8 @@ app.post('/group/:groupname', function(req, res) {
 		var body = req.body,
 			apikey = body.k || body.key,
 			rc = { streams: 0, points: 0};
+			
+			console.log(body);
 		if (err) {
 			res.send(500, err.message);
 		}
@@ -334,6 +336,8 @@ app.post('/group/:groupname', function(req, res) {
 				res.send(500, "No Such Group");
 			} else {
 				var group = grpresults[0];
+console.log(group.apikey);
+console.log(apikey);
 				if (group.apikey == apikey) {
 					// ok
 					var at = body.a || body.at || body.f || body.from;
@@ -361,11 +365,11 @@ app.post('/group/:groupname', function(req, res) {
 							} else {
 								rc.streams = rc.streams + 1;
 								var streamName = streamnames.pop(),
-									stream = streams[streamname],
+									stream = streams[streamName],
 									points = [];
 								if ( groupStreamNames[streamName]) {
 									// valid stream
-									if (stream.isArray()) {
+									if (Array.isArray(stream)) {
 										points = stream;
 									} else {
 										points.push(stream);
@@ -384,7 +388,8 @@ app.post('/group/:groupname', function(req, res) {
 												pointAt = new Date(at.getTime() + (point.o || point.offset));
 											}
 											// log data, update datastream value
-											navimonapi.addDatapoint(groupStreamNames[streamName], {at: pointAt, value: pointValue}, db, function() {
+											console.log(groupStreamNames[streamName]);
+											navimonapi.addDataPoint(groupStreamNames[streamName], {at: pointAt, value: pointValue}, db, function() {
 												processPoint();
 											});
 										}
