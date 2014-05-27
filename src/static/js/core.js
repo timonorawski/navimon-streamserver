@@ -117,7 +117,7 @@ var core = {
 					$(this._defs.target).append('<div class="chartGroup" id="' + group + '"><h1>' + group + '</h1></div>');
 					var chartGroup = $('#' + group);
 					for (var stream in this._data[group].streams) {
-						if (this._data[group].streams.hasOwnProperty(stream)) {
+						if (this._data[group].streams.hasOwnProperty(stream) && this._data[group].streams[stream].points.length > 0) {
 							this._charts[group][stream] = {};
 							chartGroup.append('<div class="chartWrap"><h2>'+stream+'</h2><div class="chart" id="' + group + "_" + stream + '"></div></div>');
 							// init chart

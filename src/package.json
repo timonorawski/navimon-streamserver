@@ -11,6 +11,8 @@
 	"passport": "0.2.x",
 	"passport-google": "0.3.x",
 	"ejs": "1.0.x",
-	"carrier": "0.1.x"
+	"carrier": "0.1.x",
+	"redis": "0.10.x",
+	"hiredis": "0.1.x"
   }
 }

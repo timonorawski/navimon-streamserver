@@ -5,7 +5,7 @@ var express = require('express'),
 	format = require('util').format,
 	fs = require('fs'),
 	navimonapi = require("./modules/api.js");
-
+//require('v8-profiler');
 app.use(express.bodyParser());
 app.set('view engine', 'ejs');
 
@@ -34,24 +34,25 @@ var getDataStream = function getDataStream(db, obj, callback, limit, type, sanit
 				delete doc.currentValue;
 			}
 			//callback(200, doc);
-			
-			cursor.sort({'at': -1}).limit(limit).toArray(function(err, results) {
-				if (!results) {
-					results = [];
-				}
-				for (var i = 0; i < results.length; i++) {
-					var point = results[i];
-					if (point.datapoints) {
-						point.nPoints = point.datapoints;
-						delete point.datapoints;
+			if (limit > 0) {
+				cursor.sort({'at': -1}).limit(limit).toArray(function(err, results) {
+					if (!results) {
+						results = [];
 					}
-					if (sanitize) {
-						delete point._id;
+					for (var i = 0; i < results.length; i++) {
+						var point = results[i];
+						if (point.datapoints) {
+							point.nPoints = point.datapoints;
+							delete point.datapoints;
+						}
+						if (sanitize) {
+							delete point._id;
+						}
 					}
-				}
-				doc.datapoints = results;
-				callback(200, doc);
-			});
+					doc.datapoints = results;
+					callback(200, doc);
+				});
+			}
 		} else {
 			callback(404, "Not Found");
 		}
@@ -75,8 +76,8 @@ app.get('/json', function(req, res){
 			if (grpresults.length > 0) {
 				var nextGroup = function() {
 					if (grpresults.length == 0) {
-						res.send(200, rc);
 						db.close();
+						res.send(200, rc);
 						return;
 					}
 					var group = grpresults.pop();
@@ -93,7 +94,7 @@ app.get('/json', function(req, res){
 							}
 							var stream = results.pop();
 							if (stream) {
-								getDataStream(db, {_id: stream._id, 'group': group._id}, getNext, parseInt(req.query.limit) || 50, req.query.type || "average", true, req.query.granularity || "10m");
+								getDataStream(db, {_id: stream._id, 'group': group._id}, getNext, (parseInt(req.query.limit) != NaN)?parseInt(req.query.limit):50, req.query.type || "average", true, req.query.granularity || "10m");
 							}
 						};
 						getNext();
@@ -101,8 +102,8 @@ app.get('/json', function(req, res){
 				}
 				nextGroup();
 			} else {
-				res.send(200, rc);
 				db.close();
+				res.send(200, rc);
 				return;
 			}
 		});
@@ -379,6 +380,7 @@ console.log(apikey);
 										if (points.length == 0) {
 											processStream();
 										} else {
+											rc.points = rc.points + 1;
 											var point = points.pop(),
 												pointAt = new Date(at.getTime()),
 												pointValue = point.v || point.value;
