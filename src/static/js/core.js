@@ -108,6 +108,18 @@ var core = {
 			}
 		});
 	},
+	drawChart: function(group, stream) {
+		// init chart
+		var chartFunc = this._chartFuncs.serial;
+		/*switch(stream) {
+		case "heading":
+		case "magheading":
+			chartFunc = this._chartFuncs.polar;
+			break;
+			
+		}*/
+		this._charts[group][stream].chart = chartFunc(group+"_"+stream, this._data[group].streams[stream].points);
+	},
 	drawCharts: function() {
 		if (!this._charts) {
 			this._charts = {};
@@ -120,16 +132,10 @@ var core = {
 						if (this._data[group].streams.hasOwnProperty(stream) && this._data[group].streams[stream].points.length > 0) {
 							this._charts[group][stream] = {};
 							chartGroup.append('<div class="chartWrap"><h2>'+stream+'</h2><div class="chart" id="' + group + "_" + stream + '"></div></div>');
-							// init chart
-							var chartFunc = this._chartFuncs.serial;
-							/*switch(stream) {
-							case "heading":
-							case "magheading":
-								chartFunc = this._chartFuncs.polar;
-								break;
-								
-							}*/
-							this._charts[group][stream].chart = chartFunc(group+"_"+stream, this._data[group].streams[stream].points);
+							core.drawChart(group, stream);
+/*							$('#'+group + "_" + stream).on('click', function() {
+								core.drawChart(group, stream);
+							})*/
 						}
 					}
 				}
